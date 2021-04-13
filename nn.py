@@ -1,5 +1,6 @@
 import math
 from random import random, randint
+import matplotlib.pyplot as plt
 
 
 class NN:
@@ -88,10 +89,10 @@ class NN:
 
 
 def activation(x):
-	return sigmoid(x)
+	return relu(x)
 
 def activation_der(x):
-	return sigmoid_der(x)
+	return relu_der(x)
 
 
 def sigmoid(x):
@@ -111,24 +112,38 @@ def relu_der(x):
 	return 0.01
 
 
+def get_avg_error(brain):
+	_errors = []
+	for t in train_set:
+		_errors.append(brain.calc_error(t[0], t[1], t[2]))
+	return sum(_errors) / len(_errors)
+
+
 train_set = [
 	(0.0, 0.0, 0.0),
 	(0.0, 1.0, 1.0),
 	(1.0, 0.0, 1.0),
 	(1.0, 1.0, 0.0)
 ]
+errors = []
 
 
 if __name__ == '__main__':
-	brain = NN(0.3)
-	for i in range(10000):
+	learning_rate = 0.3
+	brain = NN(learning_rate)
+	for i in range(10_000):
 		t_params = train_set[randint(0, 3)]
 		brain.back_prop(t_params[0], t_params[1], t_params[2])
-		#print(f'Iteration {i} -> {t_params}\n')
-		#brain.print()
+		errors.append(get_avg_error(brain))
+
 	for t in train_set:
 		print("SAMPLE: {} -> {} ({})".format(t, brain.feed_forward(t[0], t[1]), round(brain.feed_forward(t[0], t[1]))))
 		print("ERROR: {}\n".format(brain.calc_error(t[0], t[1], t[2])))
 
 	print('\n')
 	brain.print()
+	plt.plot(errors)
+	plt.xlabel('Iterations')
+	plt.title(f'(learning rate = {learning_rate})')
+	plt.ylabel('Sample error per iteration')
+	plt.show()
